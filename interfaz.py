@@ -105,6 +105,29 @@ class SimuladorMT(ctk.CTk):
             padx=15
         )
 
+        limite_lbl = ctk.CTkLabel(
+            self.sidebar,
+            text="Límite máximo de pasos:",
+            font=("Arial", 14)
+        )
+
+        limite_lbl.pack(
+            anchor="w",
+            padx=15,
+            pady=(15, 5)
+        )
+
+        self.limite_entry = ctk.CTkEntry(
+            self.sidebar,
+            height=35,
+            placeholder_text="100"
+        )
+
+        self.limite_entry.pack(
+            fill="x",
+            padx=15
+        )
+
         botones = ctk.CTkFrame(
             self.sidebar,
             fg_color="transparent"
@@ -270,19 +293,19 @@ class SimuladorMT(ctk.CTk):
         )
 
         # ===================
-        # SCROLL INFERIOR (historial + métricas)
+        # HISTORIAL
         # ===================
 
-        self.scroll_bottom = ctk.CTkScrollableFrame(
+        historial_lbl = ctk.CTkLabel(
             self.main,
-            label_text="Historial de Configuraciones y Métricas",
-            label_font=("Arial", 20, "bold")
+            text="Historial de Configuraciones",
+            font=("Arial", 20, "bold")
         )
-        self.scroll_bottom.pack(
-            fill="both",
-            expand=True,
+
+        historial_lbl.pack(
+            anchor="w",
             padx=20,
-            pady=10
+            pady=(20, 5)
         )
 
         columnas = (
@@ -293,7 +316,7 @@ class SimuladorMT(ctk.CTk):
         )
 
         self.tree = ttk.Treeview(
-            self.scroll_bottom,
+            self.main,
             columns=columnas,
             show="headings",
             height=10
@@ -308,9 +331,10 @@ class SimuladorMT(ctk.CTk):
             self.tree.heading(c, text=c)
 
         self.tree.pack(
-            fill="x",
-            padx=10,
-            pady=(10, 5)
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=10
         )
 
         # ===================
@@ -318,7 +342,7 @@ class SimuladorMT(ctk.CTk):
         # ===================
 
         self.resultado = ctk.CTkLabel(
-            self.scroll_bottom,
+            self.main,
             text="Resultado:",
             height=50,
             font=("Arial", 20, "bold")
@@ -326,15 +350,15 @@ class SimuladorMT(ctk.CTk):
 
         self.resultado.pack(
             fill="x",
-            padx=10,
-            pady=(15, 5)
+            padx=20,
+            pady=10
         )
 
         self.metricas_frame = ctk.CTkFrame(
-            self.scroll_bottom,
+            self.main,
             corner_radius=10
         )
-        self.metricas_frame.pack(fill="x", padx=10, pady=(0, 10))
+        self.metricas_frame.pack(fill="x", padx=20, pady=(0, 10))
 
         self.metricas_labels = {}
         metricas_items = [
@@ -459,6 +483,9 @@ class SimuladorMT(ctk.CTk):
         if not entrada:
             return
 
+        limite_texto = self.limite_entry.get().strip()
+        limite = int(limite_texto) if limite_texto.isdigit() else None
+
         if self.combo.get() == "L = {aⁿbⁿ}":
 
             self.mt = MaquinaTuring(
@@ -466,7 +493,8 @@ class SimuladorMT(ctk.CTk):
                 transiciones_anbn,
                 "q0",
                 "qa",
-                "qr"
+                "qr",
+                limite
             )
 
         else:
@@ -476,7 +504,8 @@ class SimuladorMT(ctk.CTk):
                 transiciones_palindromo,
                 "q0",
                 "qa",
-                "qr"
+                "qr",
+                limite
             )
 
         self.lbl_estado.configure(

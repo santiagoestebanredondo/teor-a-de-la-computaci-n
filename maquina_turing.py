@@ -6,7 +6,8 @@ class MaquinaTuring:
         transiciones,
         estado_inicial,
         estado_aceptacion,
-        estado_rechazo
+        estado_rechazo,
+        limite_pasos=None
     ):
 
         self.input_length = len(cinta)
@@ -35,6 +36,8 @@ class MaquinaTuring:
         self.movimientos_L = 0
         self.movimientos_R = 0
 
+        self.limite_pasos = limite_pasos
+
     def terminado(self):
 
         return self.estado in (
@@ -49,6 +52,17 @@ class MaquinaTuring:
     def paso(self):
 
         if self.terminado():
+            return
+
+        if self.limite_pasos is not None and self.paso_actual >= self.limite_pasos:
+            self.ultima_transicion = (
+                self.estado,
+                self.cinta[self.cabezal],
+                self.q_reject,
+                self.cinta[self.cabezal],
+                "S"
+            )
+            self.estado = self.q_reject
             return
 
         simbolo = self.cinta[self.cabezal]
