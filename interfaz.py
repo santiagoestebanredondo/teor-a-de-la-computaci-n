@@ -338,6 +338,48 @@ class SimuladorMT(ctk.CTk):
             pady=10
         )
 
+        self.metricas_frame = ctk.CTkFrame(self.main)
+        self.metricas_frame.pack(fill="x", padx=20, pady=(0, 10))
+
+        metricas_lbl = ctk.CTkLabel(
+            self.metricas_frame,
+            text="Métricas",
+            font=("Arial", 18, "bold")
+        )
+        metricas_lbl.pack(anchor="w", padx=15, pady=(10, 5))
+
+        self.metricas_grid = ctk.CTkFrame(self.metricas_frame, fg_color="transparent")
+        self.metricas_grid.pack(fill="x", padx=15, pady=(0, 10))
+
+        self.metricas_labels = {}
+        metricas_items = [
+            ("Pasos ejecutados", "0"),
+            ("Celdas visitadas", "0"),
+            ("Celdas no blancas", "0"),
+            ("Movimientos a izquierda", "0"),
+            ("Movimientos a derecha", "0"),
+            ("Resultado final", "-"),
+            ("Longitud de entrada", "0"),
+        ]
+
+        for i, (nombre, valor) in enumerate(metricas_items):
+            lbl_nombre = ctk.CTkLabel(
+                self.metricas_grid,
+                text=f"{nombre}:",
+                font=("Arial", 14),
+                anchor="w"
+            )
+            lbl_nombre.grid(row=i, column=0, sticky="w", padx=(0, 10), pady=2)
+
+            lbl_valor = ctk.CTkLabel(
+                self.metricas_grid,
+                text=valor,
+                font=("Consolas", 14, "bold"),
+                anchor="e"
+            )
+            lbl_valor.grid(row=i, column=1, sticky="e", pady=2)
+            self.metricas_labels[nombre] = lbl_valor
+
     # =====================
     # DIBUJAR CINTA
     # =====================
@@ -458,6 +500,11 @@ class SimuladorMT(ctk.CTk):
             self.mt.cinta,
             self.mt.cabezal
         )
+
+        for lbl in self.metricas_labels.values():
+            lbl.configure(text="0")
+        self.metricas_labels["Resultado final"].configure(text="En ejecución")
+        self.metricas_labels["Longitud de entrada"].configure(text=str(len(self.entrada.get().strip())))
     def ejecutar_paso(self):
 
         if self.mt is None:
@@ -512,6 +559,18 @@ class SimuladorMT(ctk.CTk):
             self.resultado.configure(
                 text="❌ Resultado: CADENA RECHAZADA"
             )
+
+        self._actualizar_metricas()
+    def _actualizar_metricas(self):
+
+        if self.mt is None:
+            return
+
+        metricas = self.mt.obtener_metricas()
+
+        for nombre, valor in metricas.items():
+            if nombre in self.metricas_labels:
+                self.metricas_labels[nombre].configure(text=str(valor))
     def ejecucion_automatica(self):
 
         if self.mt is None:
@@ -550,3 +609,8 @@ class SimuladorMT(ctk.CTk):
 
         for item in self.tree.get_children():
             self.tree.delete(item)
+
+        for lbl in self.metricas_labels.values():
+            lbl.configure(text="0")
+        self.metricas_labels["Resultado final"].configure(text="-")
+        self.metricas_labels["Longitud de entrada"].configure(text="0")

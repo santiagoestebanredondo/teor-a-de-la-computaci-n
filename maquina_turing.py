@@ -9,6 +9,8 @@ class MaquinaTuring:
         estado_rechazo
     ):
 
+        self.input_length = len(cinta)
+
         # Agregamos blancos a ambos lados
         self.cinta = ['B'] * 10 + list(cinta) + ['B'] * 20
 
@@ -26,6 +28,12 @@ class MaquinaTuring:
         self.historial = []
 
         self.ultima_transicion = None
+
+        self.celdas_visitadas = set()
+        self.celdas_visitadas.add(self.cabezal)
+
+        self.movimientos_L = 0
+        self.movimientos_R = 0
 
     def terminado(self):
 
@@ -71,9 +79,13 @@ class MaquinaTuring:
 
         if mover == "R":
             self.cabezal += 1
+            self.movimientos_R += 1
 
         elif mover == "L":
             self.cabezal -= 1
+            self.movimientos_L += 1
+
+        self.celdas_visitadas.add(self.cabezal)
 
         self.estado = nuevo_estado
 
@@ -117,6 +129,26 @@ class MaquinaTuring:
             return "RECHAZADA"
 
         return "EN EJECUCIÓN"
+    
+    def obtener_metricas(self):
+        celdas_no_blancas = sum(1 for s in self.cinta if s != 'B')
+
+        if self.estado == self.q_accept:
+            resultado = "Accept"
+        elif self.estado == self.q_reject:
+            resultado = "Reject"
+        else:
+            resultado = "Sin conclusión"
+
+        return {
+            "Pasos ejecutados": self.paso_actual,
+            "Celdas visitadas": len(self.celdas_visitadas),
+            "Celdas no blancas": celdas_no_blancas,
+            "Movimientos a izquierda": self.movimientos_L,
+            "Movimientos a derecha": self.movimientos_R,
+            "Resultado final": resultado,
+            "Longitud de entrada": self.input_length,
+        }
     
 
 transiciones_anbn = {
