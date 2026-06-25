@@ -177,18 +177,6 @@ class SimuladorMT(ctk.CTk):
             pady=5
         )
 
-        self.slider = ctk.CTkSlider(
-            self.sidebar,
-            from_=100,
-            to=2000
-        )
-
-        self.slider.pack(
-            fill="x",
-            padx=15,
-            pady=15
-        )
-
     # =====================
     # PANEL DERECHO
     # =====================
@@ -282,19 +270,19 @@ class SimuladorMT(ctk.CTk):
         )
 
         # ===================
-        # HISTORIAL
+        # SCROLL INFERIOR (historial + métricas)
         # ===================
 
-        historial_lbl = ctk.CTkLabel(
+        self.scroll_bottom = ctk.CTkScrollableFrame(
             self.main,
-            text="Historial de Configuraciones",
-            font=("Arial", 20, "bold")
+            label_text="Historial de Configuraciones y Métricas",
+            label_font=("Arial", 20, "bold")
         )
-
-        historial_lbl.pack(
-            anchor="w",
+        self.scroll_bottom.pack(
+            fill="both",
+            expand=True,
             padx=20,
-            pady=(20, 5)
+            pady=10
         )
 
         columnas = (
@@ -305,20 +293,24 @@ class SimuladorMT(ctk.CTk):
         )
 
         self.tree = ttk.Treeview(
-            self.main,
+            self.scroll_bottom,
             columns=columnas,
             show="headings",
-            height=12
+            height=10
         )
+
+        self.tree.column("Paso", width=80, anchor="center")
+        self.tree.column("Estado", width=100, anchor="center")
+        self.tree.column("Cabezal", width=100, anchor="center")
+        self.tree.column("Acción", width=400)
 
         for c in columnas:
             self.tree.heading(c, text=c)
 
         self.tree.pack(
-            fill="both",
-            expand=True,
-            padx=20,
-            pady=10
+            fill="x",
+            padx=10,
+            pady=(10, 5)
         )
 
         # ===================
@@ -326,30 +318,23 @@ class SimuladorMT(ctk.CTk):
         # ===================
 
         self.resultado = ctk.CTkLabel(
-            self.main,
+            self.scroll_bottom,
             text="Resultado:",
-            height=60,
-            font=("Arial", 22, "bold")
+            height=50,
+            font=("Arial", 20, "bold")
         )
 
         self.resultado.pack(
             fill="x",
-            padx=20,
-            pady=10
+            padx=10,
+            pady=(15, 5)
         )
 
-        self.metricas_frame = ctk.CTkFrame(self.main)
-        self.metricas_frame.pack(fill="x", padx=20, pady=(0, 10))
-
-        metricas_lbl = ctk.CTkLabel(
-            self.metricas_frame,
-            text="Métricas",
-            font=("Arial", 18, "bold")
+        self.metricas_frame = ctk.CTkFrame(
+            self.scroll_bottom,
+            corner_radius=10
         )
-        metricas_lbl.pack(anchor="w", padx=15, pady=(10, 5))
-
-        self.metricas_grid = ctk.CTkFrame(self.metricas_frame, fg_color="transparent")
-        self.metricas_grid.pack(fill="x", padx=15, pady=(0, 10))
+        self.metricas_frame.pack(fill="x", padx=10, pady=(0, 10))
 
         self.metricas_labels = {}
         metricas_items = [
@@ -363,21 +348,34 @@ class SimuladorMT(ctk.CTk):
         ]
 
         for i, (nombre, valor) in enumerate(metricas_items):
-            lbl_nombre = ctk.CTkLabel(
-                self.metricas_grid,
-                text=f"{nombre}:",
-                font=("Arial", 14),
-                anchor="w"
+            bg = "#f8f9fa" if i % 2 == 0 else "#ffffff"
+
+            fila = ctk.CTkFrame(
+                self.metricas_frame,
+                fg_color=bg,
+                corner_radius=0,
+                height=32
             )
-            lbl_nombre.grid(row=i, column=0, sticky="w", padx=(0, 10), pady=2)
+            fila.pack(fill="x")
+            fila.pack_propagate(False)
+
+            lbl_nombre = ctk.CTkLabel(
+                fila,
+                text=nombre,
+                font=("Arial", 13),
+                anchor="w",
+                text_color="#495057"
+            )
+            lbl_nombre.pack(side="left", padx=(15, 5))
 
             lbl_valor = ctk.CTkLabel(
-                self.metricas_grid,
+                fila,
                 text=valor,
-                font=("Consolas", 14, "bold"),
-                anchor="e"
+                font=("Consolas", 13, "bold"),
+                anchor="e",
+                text_color="#212529"
             )
-            lbl_valor.grid(row=i, column=1, sticky="e", pady=2)
+            lbl_valor.pack(side="right", padx=(5, 15))
             self.metricas_labels[nombre] = lbl_valor
 
     # =====================
@@ -581,10 +579,8 @@ class SimuladorMT(ctk.CTk):
 
         self.ejecutar_paso()
 
-        velocidad = int(self.slider.get())
-
         self.after(
-            velocidad,
+            self.velocidad,
             self.ejecucion_automatica
         )
     def reiniciar(self):
